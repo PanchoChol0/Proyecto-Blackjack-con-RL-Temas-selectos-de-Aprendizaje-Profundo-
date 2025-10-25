@@ -37,4 +37,18 @@ def state_to_tensor(state):
     arr = np.concatenate(([ps], d, [ua])).astype(np.float32)
     return torch.from_numpy(arr).to(DEVICE)
 
+
 INPUT_DIM = 1 + 10 + 1  # player_sum_norm + dealer_onehot + usable_ace
+
+class DQN(nn.module):
+    def __init__(self, input_dim, n_actions):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.linear(input_dim, 64),
+            nn.ReLU(),
+            nn.Linear(64,64),
+            nn.ReLU(),
+            nn.Linear(64, n_actions)
+        )
+    def forward(self, x):
+        return self.net(x)
