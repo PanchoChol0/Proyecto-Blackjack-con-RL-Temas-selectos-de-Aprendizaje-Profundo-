@@ -38,13 +38,14 @@ def state_to_tensor(state):
     return torch.from_numpy(arr).to(DEVICE)
 
 
+# DQN
 INPUT_DIM = 1 + 10 + 1  # player_sum_norm + dealer_onehot + usable_ace
 
-class DQN(nn.module):
+class DQN(nn.Module): # Olvidaste las mayusculas we
     def __init__(self, input_dim, n_actions):
         super().__init__()
         self.net = nn.Sequential(
-            nn.linear(input_dim, 64),
+            nn.Linear(input_dim, 64),
             nn.ReLU(),
             nn.Linear(64,64),
             nn.ReLU(),
@@ -52,3 +53,25 @@ class DQN(nn.module):
         )
     def forward(self, x):
         return self.net(x)
+
+Transition = collections.namedtuple("Transition", ["s","a","r","s2","done"])
+
+class ReplayBuffer:
+    def _init_(self, capacity: int):
+        self.buffer: Deque[Transition] = collections.deque(maxlen=capacity)
+
+    def push(self,*args):
+        self.buffer.append(Transition(*args))
+
+    def sample(self, batch_size: int):
+        batch = random.sample(self.buffer, batch_size)
+        s = torch.stack([t.s for t in batch])
+        a = torch.tensor([t.a for t in batch], dtype=torch.long, device=DEVICE)
+        r = torch.tensor([t.r for t in batch], dtype=torch.float32, device=DEVICE)
+        s2 = torch.stack([t.s2 for t in batch])
+        done = torch.tensor([t.done for t in batch], dtype=torch.float32, device=DEVICE)
+        return s, a, t, s2, done
+
+    def _len_(self):
+        return len(self.buffer)
+
