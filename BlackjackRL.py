@@ -1,11 +1,10 @@
 import random
 import collections
-from typing import Deque, Tuple
+from typing import Deque
 import gym
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.optim as optim
 
 # Hiperparametros
 
@@ -70,7 +69,7 @@ class ReplayBuffer:
         r = torch.tensor([t.r for t in batch], dtype=torch.float32, device=DEVICE)
         s2 = torch.stack([t.s2 for t in batch])
         done = torch.tensor([t.done for t in batch], dtype=torch.float32, device=DEVICE)
-        return s, a, t, s2, done
+        return s, a, r, s2, done #Era r y no t
 
     def _len_(self):
         return len(self.buffer)
