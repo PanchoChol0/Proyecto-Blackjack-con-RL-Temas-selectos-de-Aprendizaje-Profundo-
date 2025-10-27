@@ -56,7 +56,7 @@ class DQN(nn.Module): # Olvidaste las mayusculas we
 Transition = collections.namedtuple("Transition", ["s","a","r","s2","done"])
 
 class ReplayBuffer:
-    def _init_(self, capacity: int):
+    def __init__(self, capacity: int): #Faltaba un "_"
         self.buffer: Deque[Transition] = collections.deque(maxlen=capacity)
 
     def push(self,*args):
@@ -71,6 +71,11 @@ class ReplayBuffer:
         done = torch.tensor([t.done for t in batch], dtype=torch.float32, device=DEVICE)
         return s, a, r, s2, done #Era r y no t
 
-    def _len_(self):
+    def __len__(self):
         return len(self.buffer)
+
+#Se inicia la lista de tamaño fijo, en este caso de 50000, se usa esto para que siempre sea fijo, es más rápido que 
+#una lista, esta no va crecer indefinidamente, además de que siempre va a borrar el primer si se llena
+replay_buffer = ReplayBuffer(MEMORY_CAPACITY)
+print("Replay buffer creado correctamente. Tamaño:", len(replay_buffer))
 
