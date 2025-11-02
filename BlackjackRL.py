@@ -33,7 +33,7 @@ def state_to_tensor(state):
     d[int(dealer_card) - 1] = 1.0
     ua = 1.0 if usable_ace else 0.0
     arr = np.concatenate(([ps], d, [ua])).astype(np.float32)
-    return torch.from_numpy(arr).to()
+    return torch.from_numpy(arr).float()
 
 
 # DQN
@@ -144,7 +144,7 @@ def train():
             loss = compute_td_loss(policy_net, target_net, replay_buffer, optimizer)
             losses.append(loss)
 
-        if steps_done % TARGET_UPDATE_FREQ == 0:
+        if steps_done % TARGET_UPDATE_FREQ == 0 and steps_done > 0:
             target_net.load_state_dict(policy_net.state_dict())
 
         steps_done += 1
@@ -198,6 +198,7 @@ def evaluate(policy_net, n_games=10000):
 if __name__ == "__main__":
     trained_net = train()
     evaluate(trained_net, n_games=100000)
+
 
 
 
