@@ -10,13 +10,13 @@ import torch.optim as optim
 # Hiperparametros
 
 ENV_NAME = "Blackjack-v1"
-GAMMA = 0.99
+GAMMA = 0.9
 LR = 0.001
 BATCH_SIZE = 64
 MEMORY_CAPACITY = 50000
 MIN_REPLAY_SIZE = 500
-EPS_START = 1.0
-EPS_END = 0.01
+EPS_START = 0.9
+EPS_END = 0.5
 EPS_DECAY = 20000  # pasos para decaer epsilon
 TARGET_UPDATE_FREQ = 1000  # pasos para actualizar target network
 NUM_STEPS = 120_000
@@ -195,6 +195,7 @@ def evaluate(policy_net, n_games=10000):
 #Aquí da igual, ya nos preocuparemos después XD
 trained_net = train()
 evaluate(trained_net, n_games=100000)
+
 
 
 
