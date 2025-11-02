@@ -168,9 +168,8 @@ def train():
     env.close()
     return policy_net
 
-# -------------------------
 # EVALUACIÓN
-# -------------------------
+# Aquí ya como tal "juega" e imprime lo que nos interesa
 def evaluate(policy_net, n_games=10000):
     env = gym.make(ENV_NAME)
     total_reward = 0.0
@@ -192,12 +191,11 @@ def evaluate(policy_net, n_games=10000):
     env.close()
     print(f"Eval {n_games} partidas: reward_avg={total_reward/n_games:.4f} wins={wins} losses={losses} draws={draws}")
 
-# -------------------------
-# MAIN
-# -------------------------
-if __name__ == "__main__":
-    trained_net = train()
-    evaluate(trained_net, n_games=100000)
+#Aquí ya se ejecuta el programa, quité el if porque no sirve (por el momento), eso sirve para cuando importamos nuestras librerías
+#Aquí da igual, ya nos preocuparemos después XD
+trained_net = train()
+evaluate(trained_net, n_games=100000)
+
 
 
 
