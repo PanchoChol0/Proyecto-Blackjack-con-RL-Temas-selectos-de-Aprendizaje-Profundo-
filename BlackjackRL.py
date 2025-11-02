@@ -168,6 +168,36 @@ def train():
     env.close()
     return policy_net
 
+# -------------------------
+# EVALUACIÓN
+# -------------------------
+def evaluate(policy_net, n_games=10000):
+    env = gym.make(ENV_NAME)
+    total_reward = 0.0
+    wins = losses = draws = 0
+    for _ in range(n_games):
+        state, _ = env.reset()
+        done = False
+        while not done:
+            s_t = state_to_tensor(state)
+            with torch.no_grad():
+                action = policy_net(s_t.unsqueeze(0)).argmax(dim=1).item()
+            next_state, r, terminated, truncated, _ = env.step(action)
+            done = terminated or truncated
+            state = next_state
+        total_reward += r
+        if r > 0: wins += 1
+        elif r < 0: losses += 1
+        else: draws += 1
+    env.close()
+    print(f"Eval {n_games} partidas: reward_avg={total_reward/n_games:.4f} wins={wins} losses={losses} draws={draws}")
+
+# -------------------------
+# MAIN
+# -------------------------
+if __name__ == "__main__":
+    trained_net = train()
+    evaluate(trained_net, n_games=100000)
 
 
 
