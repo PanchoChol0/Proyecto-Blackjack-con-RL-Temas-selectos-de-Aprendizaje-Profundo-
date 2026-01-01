@@ -3,6 +3,7 @@ import collections
 from typing import Deque
 import gymnasium as gym
 import numpy as np
+import pandas as pd
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -195,6 +196,7 @@ def evaluate(policy_net, n_games=10000):
 #Aquí da igual, ya nos preocuparemos después XD
 trained_net = train()
 evaluate(trained_net, n_games=100000)
+
 
 
 
