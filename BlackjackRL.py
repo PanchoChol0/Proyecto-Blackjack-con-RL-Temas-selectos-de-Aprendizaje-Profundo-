@@ -4,6 +4,7 @@ from typing import Deque
 import gymnasium as gym
 import numpy as np
 import pandas as pd
+import ast
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -14,8 +15,10 @@ ENV_NAME = "Blackjack-v1"
 GAMMA = 0.9
 LR = 0.001
 BATCH_SIZE = 64
-MEMORY_CAPACITY = 50000
-MIN_REPLAY_SIZE = 500
+#Aumentan estas dos para sirva de algo el dataset
+MEMORY_CAPACITY = 500000
+MIN_REPLAY_SIZE = 20000
+
 EPS_START = 0.9
 EPS_END = 0.5
 EPS_DECAY = 20000  # pasos para decaer epsilon
@@ -36,6 +39,7 @@ def state_to_tensor(state):
     arr = np.concatenate(([ps], d, [ua])).astype(np.float32)
     return torch.from_numpy(arr).float()
 
+def load_huge_blackjack_data(file_path, replay_buffer, max_samples="""Tamaño a entrenar"""):
 
 # DQN
 INPUT_DIM = 1 + 10 + 1  # player_sum_norm + dealer_onehot + usable_ace
@@ -196,6 +200,7 @@ def evaluate(policy_net, n_games=10000):
 #Aquí da igual, ya nos preocuparemos después XD
 trained_net = train()
 evaluate(trained_net, n_games=100000)
+
 
 
 
