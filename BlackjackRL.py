@@ -8,22 +8,26 @@ import ast
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import pandas as pd
+import ast # convierte los datos "[10, 11]" a lista -> [10, 11]
+import os
 
 # Hiperparametros
 
 ENV_NAME = "Blackjack-v1"
-GAMMA = 0.9
-LR = 0.001
-BATCH_SIZE = 64
+GAMMA = 0.95
+LR = 0.0001
+BATCH_SIZE = 128
 #Aumentan estas dos para sirva de algo el dataset
 MEMORY_CAPACITY = 500000
 MIN_REPLAY_SIZE = 20000
 
 EPS_START = 0.9
-EPS_END = 0.5
+EPS_END = 0.1
 EPS_DECAY = 20000  # pasos para decaer epsilon
 TARGET_UPDATE_FREQ = 1000  # pasos para actualizar target network
-NUM_STEPS = 120_000
+NUM_STEPS = 1_000_000
+INPUT_DIM = 12
 
 # Función para convertir el estado del entorno en un tensor
 
@@ -39,8 +43,56 @@ def state_to_tensor(state):
     arr = np.concatenate(([ps], d, [ua])).astype(np.float32)
     return torch.from_numpy(arr).float()
 
-def load_huge_blackjack_data(file_path, replay_buffer, max_samples="""Tamaño a entrenar"""):
+def load_huge_blackjack_data(file_path, replay_buffer, max_samples=10000000): # se cargan el 20% de todo el dataset o sea 10 millones de jugadas
+    if not os.path.exists(file_path):
+        print(f"Archivo {file_path} no encontrado")
+        return
+        
+    samples_added = 0
 
+    reader = pd.read_csv(file_path, chunksize = 5000) # se leen por tramos para no agotar la ram
+
+    for chunk in reader:
+        for _, row in chunk.iterrows():
+            try:
+                dealer_card = int(row['dealer_up'])
+                # convertir strings "[10, 11]" a listas reales
+                hand = ast.literal_eval(row['initial_hand'])
+                actions = ast.literal_eval(row['actions_taken'])
+                reward_final = float(row['run_count'])
+                
+                # estado inicial
+                current_sum = sum(hand)
+                has_ace = 11 in hand
+                
+                # procesar cada accion en la mano
+                for i, action_str in enumerate(actions):
+                    state_tuple = (current_sum, dealer_card, has_ace)
+                    s_t = state_to_tensor(state_tuple)
+                    
+                    # Acciones: 'H' -> 1, 'S' -> 0
+                    a = 1 if action_str == 'H' else 0
+                    
+                    # si es la última acción, usamos la recompensa real del dataset
+                    done = (i == len(actions) - 1)
+                    r = reward_final if done else 0.0
+                    
+                    # siguiente estado
+                    s2_t = state_to_tensor((0, 0, False)) if done else s_t 
+                    
+                    replay_buffer.push(s_t, a, r, s2_t, done)
+                    samples_added += 1
+                    
+                    if samples_added >= max_samples: break
+            except:
+                continue # Saltar filas con errores de formato
+            
+            if samples_added >= max_samples: break
+        if samples_added >= max_samples: break
+        
+    print(f"Carga finalizada: {samples_added} experiencias añadidas al buffer.")
+
+    
 # DQN
 INPUT_DIM = 1 + 10 + 1  # player_sum_norm + dealer_onehot + usable_ace
 
@@ -200,6 +252,7 @@ def evaluate(policy_net, n_games=10000):
 #Aquí da igual, ya nos preocuparemos después XD
 trained_net = train()
 evaluate(trained_net, n_games=100000)
+
 
 
 
