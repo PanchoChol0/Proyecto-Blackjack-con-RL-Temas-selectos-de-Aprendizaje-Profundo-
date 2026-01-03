@@ -4,12 +4,10 @@ from typing import Deque
 import gymnasium as gym
 import numpy as np
 import pandas as pd
-import ast
+import ast # convierte los datos "[10, 11]" a lista -> [10, 11]
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import pandas as pd
-import ast # convierte los datos "[10, 11]" a lista -> [10, 11]
 import os
 
 # Hiperparametros
@@ -252,6 +250,7 @@ def evaluate(policy_net, n_games=10000):
 #Aquí da igual, ya nos preocuparemos después XD
 trained_net = train()
 evaluate(trained_net, n_games=100000)
+
 
 
 
