@@ -168,9 +168,12 @@ def train():
     optimizer = optim.Adam(policy_net.parameters(), lr=LR)
     replay_buffer = ReplayBuffer(MEMORY_CAPACITY)
 
+    Cargar el dataset de 4GB primero
+    load_huge_blackjack_data("blackjack_simulator.csv", replay_buffer)
+
     # Rellenar replay con transiciones aleatorias iniciales
     state, _ = env.reset()
-    for _ in range(MIN_REPLAY_SIZE):
+    while len(replay_buffer) < MIN_REPLAY_SIZE:
         s_t = state_to_tensor(state)
         a = random.randrange(n_actions)
         s2, r, terminated, truncated, _ = env.step(a)
@@ -178,7 +181,7 @@ def train():
         s2_t = state_to_tensor(s2)
         replay_buffer.push(s_t, a, r, s2_t, done)
         state = env.reset()[0] if done else s2
-
+    
     steps_done = 0
     losses = []
     episode_rewards = []
@@ -214,7 +217,6 @@ def train():
         # Logging simple cada cierto número de pasos
         if steps_done % 10000 == 0:
             avg_r = np.mean(episode_rewards[-500:]) if episode_rewards else 0.0
-            avg_loss = np.mean(losses[-500:]) if losses else 0.0
             print(f"Steps {steps_done}  avg_reward(last500 eps)={avg_r:.3f}  avg_loss={avg_loss:.4f}")
 
     # Guardar modelo final
